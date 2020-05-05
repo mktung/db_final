@@ -2,9 +2,13 @@ import psycopg2
 import psycopg2.extras
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import pandas as pd
 import matplotlib.dates as dates
 from decimal import Decimal
 from datetime import datetime
+
+pd.set_option('display.max_columns', None)
+pd.set_option('expand_frame_repr', False)
 
 def count_country_attack(conn, country):
     cursor = conn.cursor()
@@ -121,7 +125,7 @@ def plot_nasdaq_US_attack(conn, month, us_attack, nasdaq):
     monthsFmt = mdates.DateFormatter('%m')
     ax1.xaxis.set_major_locator(months)
     ax1.xaxis.set_major_formatter(monthsFmt)
-    plt.plot(month, us_attack, label ='Numer of Attack in US in 1977', color='aquamarine')
+    plt.plot(month, us_attack, label ='Numer of Attack in US', color='aquamarine')
     plt.legend()
     ax1.set_xlabel('Month')
     ax1.set_ylabel('Total Attacks')
@@ -132,8 +136,8 @@ def plot_nasdaq_US_attack(conn, month, us_attack, nasdaq):
     ax2 = ax1.twinx()
     ax2.xaxis.set_major_locator(months)
     ax2.xaxis.set_major_formatter(monthsFmt)
-
-    plt.plot(month, nasdaq, label ='NASDAQ Volume Weighted Average Price (VWAP) in 1977', color='paleturquoise')
+    
+    plt.plot(month, nasdaq, label ='NASDAQ Volume Weighted Average Price (VWAP)', color='paleturquoise')
     plt.legend()
     ax2.set_xlabel('Month')
     ax2.set_ylabel('NASDAQ VWAP')
@@ -141,57 +145,100 @@ def plot_nasdaq_US_attack(conn, month, us_attack, nasdaq):
     plt.title('Relation of Terrorist Attacks in US with NASDAQ Price \n(Color from Animal Crossing)')
     plt.show()
 
-def target_attack_summary(conn):
+def attack_target_summary(conn):
     cursor = conn.cursor()
     query8 = '''
     DROP TABLE IF EXISTS ret CASCADE;
-    SELECT target_type, date_trunc('year', date) as year, count(*) AS total_attacks, sum(number_killed) AS total_killed
+    SELECT target_type, count(*) AS total_attacks, sum(number_killed) AS total_killed
     INTO TEMP TABLE ret
     FROM attack_data, attack_location, attacks
     WHERE attack_data.attackid = attack_location.attackid 
-    AND attack_data.attackid = attacks.attackid 
-    AND date > date '1970-01-01'
-    AND date < date '1991-01-01'    
-    GROUP BY country, date_trunc('year', date)
-    ORDER BY country, date_trunc('year', date)    
+    AND attack_data.attackid = attacks.attackid  
+    GROUP BY target_type
+    ORDER BY total_attacks 
     '''
     cursor.execute(query8)
 
-    query4 = '''
-    SELECT country, sum(total_attacks) AS SUMofATTACK
+    query9 = '''
+    SELECT target_type, sum(total_attacks) AS SUMofATTACK
     FROM ret
-    GROUP BY country
+    GROUP BY target_type
     ORDER BY SUMofATTACK DESC
-    LIMIT 10
+    LIMIT 5
     '''
-    cursor.execute(query4)
+    cursor.execute(query9)
     rows = cursor.fetchall();
     return rows
 
+def attack_type_summary(conn):
+    cursor = conn.cursor()
+    query10 = '''
+    DROP TABLE IF EXISTS ret CASCADE;
+    SELECT attack_type, count(*) AS total_attacks, sum(number_killed) AS total_killed
+    INTO TEMP TABLE ret
+    FROM attack_data, attacks
+    WHERE attack_data.attackid = attacks.attackid  
+    GROUP BY attack_type
+    ORDER BY total_attacks    
+    '''
+    cursor.execute(query10)
+
+    query11 = '''
+    SELECT attack_type, sum(total_attacks) AS SUMofATTACK
+    FROM ret
+    GROUP BY attack_type
+    ORDER BY SUMofATTACK DESC
+    LIMIT 5
+    '''
+    cursor.execute(query11)
+    rows = cursor.fetchall();
+    return rows
+
+def cross_tabbing(conn):
+    cursor = conn.cursor()
+    query11 = '''
+    CREATE EXTENSION IF NOT EXISTS tablefunc;
+    SELECT * 
+    FROM crosstab(
+    'select attack_type,target_type, count(*) as total_attack
+    from attack_data, attack_location
+    where attack_data.attackid = attack_location.attackid
+    and (attack_type = ''Bombing/Explosion'' or attack_type = ''Armed Assault''
+    or attack_type = ''Assassination'' or attack_type = ''Facility/Infrastructure Attack''
+    or attack_type = ''Hostage Taking (Kidnapping)'')
+    and (target_type = ''Business'' or target_type = ''Private Citizens & Property''
+    or target_type = ''Military'' or target_type = ''Government (General)''
+    or target_type = ''Police'')
+    group by target_type, attack_type
+    order by 1,2') 
+
+    AS ct(attack_type varchar(255), "Business" bigint, "Private Citizens & Property" bigint,
+    "Military" bigint, "Government (General)" bigint, "Police" bigint);
+    '''
+    cursor.execute(query11)
+    rows = cursor.fetchall();
+    return rows
 
 def main():
     connection_string = "host='localhost' dbname='dbms_final_project' user='dbms_project_user' password='dbms_password'"
     conn = psycopg2.connect(connection_string)
-    '''
-    rows1 = count_country_attack(conn, "United States")
-    year1 = [r[1] for r in rows1]
-    attack_number1 = [r[2] for r in rows1]
 
-    rows2 = count_country_attack(conn, "Afghanistan")
-    year2 = [r[1] for r in rows2]
-    attack_number2 = [r[2] for r in rows2]
+    # Interface starts:
+    print("Welcome to Database Course Project !!!")
+    print("This project explores data on terrorist attack information and stock price from YEAR 1970 to YEAR 1990.")
 
-    year = []
-    attack_number = []
-    country = []
+    # Q1. Input a country name to see attack details:
+    print("Step 1: Please input a country name to check attack details:")
+    print("e.g. United States, United Kindom, Japan, Mexico, Italy.")
+    input_country = input('Enter the country name => ')
+    data1 = count_country_attack(conn, input_country)
+    df = pd.DataFrame(data1, columns=['Country', 'Year (Starts from Jan 01)', 'Total Attacks', 'Total Killed'])
+    print(df)
+    print()
+    input('Hit keyboard to continue => ')
 
-    year.append(year1)
-    year.append(year2)
-    attack_number.append(attack_number1)
-    attack_number.append(attack_number2)
-    country.append("United States")
-    country.append("Afghanistan")
-    '''
+    # Q2. Show top 10 countries in terrorist attacks:
+    print("Step 2. Show the top 10 countries in terrorist attack numbers from 1970 to 1990: ")
     rows = country_attack_summary(conn)
     ten_countries = []
     for r in rows:
@@ -206,16 +253,46 @@ def main():
         year.append(temp_year)
         total_attack.append(temp_attack_number)
 
-    #plot_country_attack(total_attack, year, ten_countries)
+    plot_country_attack(total_attack, year, ten_countries)
+    print("Close graph to continue")
+    input('Hit keyboard to continue => ')
 
-    year_start = datetime.strptime('1977', '%Y')
-    year_end = datetime.strptime('1978', '%Y')
+    # Q3. Relation between number of attacks in US and NASDAQ price:
+    print("Step 3: Check the relationship between number of attacks in US and NASDAQ price in ONE year:")
+    input_year = input('Enter YEAR => ')
+    year_start = datetime.strptime(input_year, '%Y')
+    year_end = datetime.strptime(str(int(input_year)+1), '%Y')
     nasdaq = [r[1] for r in nasdaq_year(conn,year_start, year_end)]
     month = [r[0] for r in nasdaq_year(conn, year_start, year_end)]
     us_attack = [r[2] for r in count_US_attack(conn, year_start, year_end)]
     plot_nasdaq_US_attack(conn, month, us_attack, nasdaq)
 
-    print(country_attack_summary(conn))
+    print("Close graph to continue")
+    input('Hit keyboard to continue => ')
+
+    # Q4. Check the TOP 5 most frequent terrorist attacks worldwide from 1970 to 1990:
+    print("Step 4: Now we will tell you the 5 most frequent types of terrorist attack that happened between 1970 to 1990: ")
+    data2 = attack_type_summary(conn)
+    df = pd.DataFrame(data2, columns=['Attack Type', 'Total Attacks'])
+    print(df)
+    print()
+    input('Hit keyboard to continue => ')
+
+    # Q5. Check the TOP 5 targets most frequently attacked by terrorists worldwide from 1970 to 1990:
+    print("Step 5: Now we will tell you the TOP 5 target types most frequently attacked between 1970 to 1990:")
+    data3 = attack_target_summary(conn)
+    df = pd.DataFrame(data3, columns=['Attack Target', 'Total Attacks'])
+    print(df)
+    print()
+    input('Hit keyboard to continue => ')
+
+    # Q6. Create cross-tabling to explore relationship between target type and attack type:
+    print("Step 6: Now we will use cross-tabbing to help you understand how target types and attack types are related !")
+    data4 = cross_tabbing(conn)
+    df = pd.DataFrame(data4, columns=["Attack Type", "Business", "Private Citizens & Property", "Military", "Government (General)", "Police"])
+    print(df)
+    print()
+    input('Thank you!!! Hit keyboard to end => ')
 
 if __name__ == "__main__":
     main()
