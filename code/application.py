@@ -125,7 +125,7 @@ def plot_nasdaq_US_attack(conn, month, us_attack, nasdaq):
     monthsFmt = mdates.DateFormatter('%m')
     ax1.xaxis.set_major_locator(months)
     ax1.xaxis.set_major_formatter(monthsFmt)
-    plt.plot(month, us_attack, label ='Numer of Attack in US', color='aquamarine')
+    plt.plot(month, us_attack, label ='Number of Attack in US', color='aquamarine')
     plt.legend()
     ax1.set_xlabel('Month')
     ax1.set_ylabel('Total Attacks')
@@ -229,7 +229,7 @@ def main():
 
     # Q1. Input a country name to see attack details:
     print("Step 1: Please input a country name to check attack details:")
-    print("e.g. United States, United Kindom, Japan, Mexico, Italy.")
+    print("e.g. United States, United Kingdom, Japan, Mexico, Italy.")
     input_country = input('Enter the country name => ')
     data1 = count_country_attack(conn, input_country)
     df = pd.DataFrame(data1, columns=['Country', 'Year (Starts from Jan 01)', 'Total Attacks', 'Total Killed'])
