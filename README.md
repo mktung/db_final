@@ -194,10 +194,10 @@ The fourth interface will tell us the most frequent terrorist attack in a 20 yea
 The top 5 target types are: business, private citizens and property, military, government and police. 
 
 ## Team members:
-Sian Chen
-Jakob Didio
-Shiwei Huang
-Maya Tung
-Shuting Yang
+* Sian Chen
+* Jakob Didio
+* Shiwei Huang
+* Maya Tung
+* Shuting Yang
 
 
