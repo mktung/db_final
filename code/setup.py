@@ -9,6 +9,7 @@ parsed = None
 progress_timer_thread = None
 cutoff_date = 1990
 
+# executes commands to set up schema in database
 def setup_schema(connection_string):
     print("Loading data")
     conn = psycopg2.connect(connection_string)
@@ -20,6 +21,10 @@ def setup_schema(connection_string):
         cursor.execute(setup_queries)
         conn.commit()
 
+# all of the _query functions below are functions which are used
+# in a factory manner by the load_file function which calls
+# the appropriate _query function for the type of data to
+# be inserted
 def company_information_query(line):
     if line:
         data = {
@@ -156,6 +161,7 @@ def attack_data_query(line):
                 "%(number_killed)s);",
             data)
 
+# this function is called continuously when loading data to output progress of loading
 def print_progress():
     global parsed
     global progress_timer_thread
@@ -176,6 +182,8 @@ def load_file(connection_string, query_factories, filename, encoding='utf_8'):
         reader = csv.reader(file)
         skip_first_line = True
         queries = {}
+        # this collects the factory functions for each query into a list that can be
+        # used with execute_batch in the interest of efficiency
         for f_idx, factory in enumerate(query_factories):
             queries[f_idx] = []
         print_progress()
@@ -184,6 +192,7 @@ def load_file(connection_string, query_factories, filename, encoding='utf_8'):
             if skip_first_line:
                 skip_first_line = False
                 continue
+            # iterates over factory functions
             for f_idx, factory in enumerate(query_factories):
                 query = factory(line)
                 if query[1] == None:
