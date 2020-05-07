@@ -20,7 +20,9 @@ Daily stock prices for a selection of several thousand stock tickers from NYSE a
 * [Global Terrorism Dataset](https://www.kaggle.com/START-UMD/gtd) - The terrorism dataset
 * [Historical Stock Price Datasets](https://www.kaggle.com/ehallmar/daily-historical-stock-prices-1970-2018) - The stockprice dataset
 
-Please download the datasets from the links above, as they cannot be downloaded from datasets.txt.
+Please download the datasets from the links above, as they cannot be downloaded from datasets.txt. Downloading from the
+above sources is identical to any other kaggle dataset, just log into kaggle and then press the download button towards the
+top of the page.
 
 ### Link To The Video
 
