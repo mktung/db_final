@@ -117,7 +117,6 @@ CREATE TABLE historical_stock_prices(
 
 ```
 
-```
 
 Third: attacks
 ```
