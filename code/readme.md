@@ -89,7 +89,7 @@ REPRESENTATION. You represent that You are at least 18 years of age.
 
 ### Relational Joining
 
-The datasets will be joined across NASDAQ stock prices within the United States and the terrorist attack within the United States within the given year.
+The datasets will be joined across the year for NASDAQ stock prices within the United States and year for terrorist attacks within the United States.
 
 
 ## Adjustments to db-setup.sql
