@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS attacks CASCADE;
 DROP TABLE IF EXISTS attack_location CASCADE;
 DROP TABLE IF EXISTS attack_data CASCADE;
 
+CREATE EXTENSION IF NOT EXISTS tablefunc;
 
 CREATE TABLE company_information(
     ticker VARCHAR(15),
