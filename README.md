@@ -193,5 +193,11 @@ The third interface will check the relationship between the number of attacks in
 The fourth interface will tell us the most frequent terrorist attack in a 20 year interval. Our result shows the top frequent way of terrorist attack is bombing, armed assult, assassination, facility insult and hostilge taking. 
 The top 5 target types are: business, private citizens and property, military, government and police. 
 
+## Team members:
+Sian Chen
+Jakob Didio
+Shiwei Huang
+Maya Tung
+Shuting Yang
 
 
