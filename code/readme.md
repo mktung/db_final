@@ -191,7 +191,11 @@ The second interface will show 10 countries with the most terrorist attacks with
 The third interface will check the relationship between the number of attacks in the US and NASDAQ price in one year. It will pop up a plot from Jan - Dec in 1970, with volume weighted average price from NASQUE. 
 
 The fourth interface will tell us the most frequent terrorist attack in a 20 year interval. Our result shows the top frequent way of terrorist attack is bombing, armed assult, assassination, facility insult and hostilge taking. 
-The top 5 target types are: business, private citizens and property, military, government and police. 
+The top 5 target types are: business, private citizens and property, military, government and police.
+
+The fifth interface will tell us the most top 5 most common categories of targets for terrorist attacks for the interval from 1970-1990.
+
+The sixth interface uses cross-tabbing to tell us which categories of targets are most often targeted by specific types of attacks.
 
 ## Team members:
 * Sian Chen
